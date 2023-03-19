@@ -1,7 +1,7 @@
 # go-remoteexec
 Bootstrap servers using Go Remote Execution via SSH
 
-##Usage
+## Usage
 
 To run the bootstrap scripts on an instance with password:
 ```bash

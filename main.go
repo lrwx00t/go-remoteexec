@@ -7,6 +7,8 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"path/filepath"
+	"strings"
 
 	"golang.org/x/crypto/ssh"
 )
@@ -38,6 +40,10 @@ func main() {
 	}
 
 	if len(*ssh_identity_flag) > 0 {
+		if strings.HasPrefix(*ssh_identity_flag, "~/") {
+			dirname, _ := os.UserHomeDir()
+			*ssh_identity_flag = filepath.Join(dirname, (*ssh_identity_flag)[2:])
+		}
 		pemBytes, err := os.ReadFile(*ssh_identity_flag)
 		if err != nil {
 			panic(err)

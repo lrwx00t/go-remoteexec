@@ -67,28 +67,13 @@ func main() {
 		os.Exit(1)
 	}
 	defer conn.Close()
+	ssh_utils.SSHCopyFile(conn, "main.go", "main.go.new")
 	delete_repo := "rm -fR go-bootstrap"
 	clone_repo := "git clone https://github.com/0xack13/go-bootstrap"
-	session_execute(delete_repo, conn)
-	session_execute(clone_repo, conn)
-	session_execute("cd go-bootstrap && make install", conn)
+	ssh_utils.Session_execute(delete_repo, conn)
+	ssh_utils.Session_execute(clone_repo, conn)
+	ssh_utils.Session_execute("cd go-bootstrap && make install", conn)
 	fmt.Println("finished boostrap. cleaning up..")
-	session_execute(delete_repo, conn)
+	ssh_utils.Session_execute(delete_repo, conn)
 
-}
-
-func session_execute(cmd string, conn *ssh.Client) {
-	session, err := conn.NewSession()
-	if err != nil {
-		fmt.Printf("Failed to create session: %s", err)
-		os.Exit(1)
-	}
-	defer session.Close()
-
-	out, err := session.Output(cmd)
-	if err != nil {
-		fmt.Printf("Failed to run command: %s", err)
-		os.Exit(1)
-	}
-	fmt.Printf("%s", out)
 }

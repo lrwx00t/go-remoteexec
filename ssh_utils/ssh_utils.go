@@ -5,7 +5,9 @@ import (
 	"encoding/pem"
 	"errors"
 	"fmt"
+	"os"
 
+	"github.com/pkg/sftp"
 	"golang.org/x/crypto/ssh"
 )
 
@@ -70,4 +72,45 @@ func parsePemBlock(block *pem.Block) (interface{}, error) {
 	default:
 		return nil, fmt.Errorf("parsing private key failed, unsupported key type %q", block.Type)
 	}
+}
+
+func Session_execute(cmd string, conn *ssh.Client) {
+	session, err := conn.NewSession()
+	if err != nil {
+		fmt.Printf("Failed to create session: %s", err)
+		os.Exit(1)
+	}
+	defer session.Close()
+
+	out, err := session.Output(cmd)
+	if err != nil {
+		fmt.Printf("Failed to run command: %s", err)
+		os.Exit(1)
+	}
+	fmt.Printf("%s", out)
+}
+
+func SSHCopyFile(client *ssh.Client, srcPath, dstPath string) error {
+	sftp, err := sftp.NewClient(client)
+	if err != nil {
+		return err
+	}
+	defer sftp.Close()
+
+	srcFile, err := os.Open(srcPath)
+	if err != nil {
+		return err
+	}
+	defer srcFile.Close()
+
+	dstFile, err := sftp.Create(dstPath)
+	if err != nil {
+		return err
+	}
+	defer dstFile.Close()
+
+	if _, err := dstFile.ReadFrom(srcFile); err != nil {
+		return err
+	}
+	return nil
 }

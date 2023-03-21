@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"flag"
 	"fmt"
 	"net"
@@ -74,7 +75,11 @@ func main() {
 				return nil, err
 			}
 			agentClient := agent.NewClient(conn)
-			return agentClient.Signers()
+			signers, err := agentClient.Signers()
+			if len(signers) == 0 || err != nil {
+				return nil, errors.New("no keys found")
+			}
+			return signers, nil
 		}
 
 		hostKeyCallback := func(hostname string, remote net.Addr, key ssh.PublicKey) error {

@@ -90,6 +90,7 @@ func Session_execute(cmd string, conn *ssh.Client) {
 	fmt.Printf("%s", out)
 }
 
+// rsync
 func SSHCopyFile(client *ssh.Client, srcPath, dstPath string) error {
 	sftp, err := sftp.NewClient(client)
 	if err != nil {

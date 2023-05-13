@@ -139,21 +139,12 @@ func main() {
 	}
 
 	ssh_utils.Session_execute("echo $HELLO", conn)
-	// ssh_utils.Session_execute("export HELLO=\"mew2\"", conn)
 	ssh_utils.Session_execute("echo $HELLO", conn)
-	// ---------------
 	ssh_utils.SSHCopyFile(conn, "main.go", "main.go.new")
-	// delete_cmd := "rm -fR go-bootstrap"
-	// ssh_utils.Session_execute(delete_cmd, conn)
-	// clone_repo_cmd := "git clone https://github.com/0xack13/go-bootstrap"
-	// ssh_utils.Session_execute(clone_repo_cmd, conn)
 	remoteexec.Cleanup_exec(ge)
 	remoteexec.ServerClone(ge)
 	ssh_utils.Session_execute("cd go-bootstrap && make install", conn)
-	// ssh_utils.Session_execute(remoteexec.Ps1(config.HostAlias), conn)
 	remoteexec.PS1_exec(ge)
 	fmt.Println("finished boostrap. cleaning up..")
 	remoteexec.Cleanup_exec(ge)
-	// ssh_utils.Session_execute(delete_cmd, conn)
-
 }

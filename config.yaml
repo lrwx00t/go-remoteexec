@@ -1,4 +1,4 @@
-repo: github.com/yourusername/yourrepo
+repo: https://github.com/0xack13/go-bootstrap
 entrypoint: cmd/main.go
 homedir: .
 mode: serverclone

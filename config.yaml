@@ -1,0 +1,5 @@
+repo: github.com/yourusername/yourrepo
+entrypoint: cmd/main.go
+homedir: .
+mode: serverclone
+hostalias: gllo

@@ -82,6 +82,7 @@ func Session_execute(cmd string, conn *ssh.Client) {
 	}
 	defer session.Close()
 
+	fmt.Printf("Executing: %s", cmd)
 	out, err := session.Output(cmd)
 	if err != nil {
 		fmt.Printf("Failed to run command: %s", err)

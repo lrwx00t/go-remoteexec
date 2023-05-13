@@ -4,11 +4,14 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"log"
 	"net"
 	"os"
 	"path/filepath"
 	"strings"
 
+	"github.com/lrwx00t/go-remoteexec/config"
+	"github.com/lrwx00t/go-remoteexec/remoteexec"
 	"github.com/lrwx00t/go-remoteexec/ssh_utils"
 	"golang.org/x/crypto/ssh"
 	"golang.org/x/crypto/ssh/agent"
@@ -24,9 +27,17 @@ import (
 // file transfer / scp / evaluate secret
 
 func main() {
+	configFilePath := "config.yaml"
+	c, err := config.ReadConfigFile(configFilePath)
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Printf("Repo: %s\nEntrypoint: %s\n", c.Repo, c.Entrypoint)
+	fmt.Printf("Home Dir: %s\n", c.HomeDir)
 
 	var ssh_remote_address_flag = flag.String("a", "", "identity")
 	var ssh_identity_flag = flag.String("i", "", "identity")
+	// os.Exit(0)
 
 	flag.Parse()
 	remoteexec_pass := os.Getenv("REMOTEEXEC_PASS")
@@ -102,6 +113,7 @@ func main() {
 		os.Exit(1)
 	}
 	defer conn.Close()
+	ge := config.GlobalExec{Connection: conn, Config: *c}
 	// Set environment variables for the session
 	session, err := conn.NewSession()
 	// session, err := conn.NewSession()
@@ -127,12 +139,15 @@ func main() {
 	ssh_utils.Session_execute("echo $HELLO", conn)
 	// ---------------
 	ssh_utils.SSHCopyFile(conn, "main.go", "main.go.new")
-	delete_repo := "rm -fR go-bootstrap"
-	clone_repo := "git clone https://github.com/0xack13/go-bootstrap"
-	ssh_utils.Session_execute(delete_repo, conn)
-	ssh_utils.Session_execute(clone_repo, conn)
+	delete_cmd := "rm -fR go-bootstrap"
+	ssh_utils.Session_execute(delete_cmd, conn)
+	// clone_repo_cmd := "git clone https://github.com/0xack13/go-bootstrap"
+	// ssh_utils.Session_execute(clone_repo_cmd, conn)
+	remoteexec.ServerClone(ge)
 	ssh_utils.Session_execute("cd go-bootstrap && make install", conn)
+	// ssh_utils.Session_execute(remoteexec.Ps1(config.HostAlias), conn)
+	remoteexec.PS1_exec(ge)
 	fmt.Println("finished boostrap. cleaning up..")
-	ssh_utils.Session_execute(delete_repo, conn)
+	ssh_utils.Session_execute(delete_cmd, conn)
 
 }
